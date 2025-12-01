@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.Y2024;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,7 +9,7 @@ public class day11 {
     private static final List<Long> stones = new ArrayList<>();
 
     public static void main(String[] args) {
-        File input = new File("src/main/resources/day11.in");
+        File input = new File("src/main/resources/Y2024/day11.in");
         readFile(input);
         part1();
         part2();

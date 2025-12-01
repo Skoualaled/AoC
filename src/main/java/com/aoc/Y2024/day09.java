@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.Y2024;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,7 +9,7 @@ public class day09 {
     private static ArrayList<Block> DiskMap;
     private static int[] charMap;
     public static void main(String[] args) {
-        File input = new File("src/main/resources/day09.in");
+        File input = new File("src/main/resources/Y2024/day09.in");
         part1(input); // 6398608069280
         part2(input); // 6427437134372
     }

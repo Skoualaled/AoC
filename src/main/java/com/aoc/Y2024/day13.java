@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.Y2024;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,7 +14,7 @@ public class day13 {
     private static final ArrayList<ClawMachine> machines = new ArrayList<>();
 
     public static void main(String[] args) {
-        File input = new File("src/main/resources/day13.in");
+        File input = new File("src/main/resources/Y2024/day13.in");
         readFile(input);
         part1();
         part2();

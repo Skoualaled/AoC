@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.Y2024;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,7 +16,7 @@ public class day14 {
     private static final int qyLimit = (bathY)/2;
 
     public static void main(String[] args) {
-        File input = new File("src/main/resources/day14.in");
+        File input = new File("src/main/resources/Y2024/day14.in");
         readFile(input);
         solve();
     }

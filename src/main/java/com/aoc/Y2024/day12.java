@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.Y2024;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,7 +10,7 @@ public class day12 {
     private static final ArrayList<ArrayList<Boolean>> checked = new ArrayList<>();
 
     public static void main(String[] args) {
-        File input = new File("src/main/resources/day12.in");
+        File input = new File("src/main/resources/Y2024/day12.in");
         readFile(input);
         solve();
     }

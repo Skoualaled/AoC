@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.Y2024;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,7 +11,7 @@ public class day18 {
     private static final int limit = 1024;
 
     public static void main(String[] args) {
-        File input = new File("src/main/resources/day18.in");
+        File input = new File("src/main/resources/Y2024/day18.in");
         readFile(input);
         part1();
         part2();

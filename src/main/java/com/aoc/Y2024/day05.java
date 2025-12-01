@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.Y2024;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,7 +12,7 @@ public class day05 {
     private static List<List<String>> updates;
 
     public static void main(String[] args) {
-        File input = new File("src/main/resources/day05.in");
+        File input = new File("src/main/resources/Y2024/day05.in");
         readFile(input);
         part1(); // 4135
         part2(); // 5285

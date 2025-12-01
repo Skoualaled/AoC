@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.Y2024;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,7 +12,7 @@ public class day03
     private static final Pattern mult = Pattern.compile("mul\\((\\d+),(\\d+)\\)");
 
     public static void main(String[] args) {
-        File input = new File("src/main/resources/day03.in");
+        File input = new File("src/main/resources/Y2024/day03.in");
         readFile(input);
         part1(); // 161289189
         part2(); // 83595109

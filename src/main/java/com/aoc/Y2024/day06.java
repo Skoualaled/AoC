@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.Y2024;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,7 +11,7 @@ public class day06 {
     static final HashSet<Position> path = new HashSet<>();
 
     public static void main(String[] args) {
-        File input = new File("src/main/resources/day06.in");
+        File input = new File("src/main/resources/Y2024/day06.in");
         readFile(input);
         part1();
         part2();

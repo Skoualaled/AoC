@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.Y2024;
 
 import com.google.common.collect.Comparators;
 
@@ -15,7 +15,7 @@ public class day02 {
     public static List<Reports> data = new ArrayList<>();
 
     public static void main(String[] args) {
-        File input = new File("src/main/resources/day02.in");
+        File input = new File("src/main/resources/Y2024/day02.in");
         readFile(input);
         part1();
         part2();

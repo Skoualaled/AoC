@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.Y2024;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,7 +10,7 @@ public class day16 {
     private static Reindeer initReindeer;
     private static Reindeer ending;
     public static void main(String[] args) {
-        File input = new File("src/main/resources/day16.in");
+        File input = new File("src/main/resources/Y2024/day16.in");
         readFile(input);
         part1();
     }
