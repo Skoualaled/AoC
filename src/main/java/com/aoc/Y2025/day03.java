@@ -4,12 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
+
 
 public class day03 {
     public static void main(String[] args) {
@@ -34,14 +30,12 @@ public class day03 {
     }
 
     private static void part1(){
-        long res;
-        res = data.stream().map(day03::getBankJoltage).mapToLong(Long::longValue).sum();
+        long res = data.stream().map(day03::getBankJoltage).mapToLong(Long::longValue).sum();
         System.out.println("part 1 : " + res);
     }
 
     private static void part2(){
-        long res =0;
-
+        long res = data.stream().map(day03::get12BankJoltage).mapToLong(Long::longValue).sum();
         System.out.println("part 2 : " + res);
     }
 
@@ -64,5 +58,25 @@ public class day03 {
         }
         return Long.parseLong(StringUtils.join(fmax,smax));
     }
-
+    private static long get12BankJoltage(String bank) {
+        List<Integer> batteries = Arrays.stream(bank.split("")).mapToInt(Integer::parseInt).boxed().toList();
+        StringBuilder s = new StringBuilder();
+        int idx = 0;
+        for(int i = 12; i > 0; i--){
+            idx = boundedMaxIndex(batteries, idx, i) + 1;
+            s.append(batteries.get(idx - 1));
+        }
+        return Long.parseLong(s.toString());
+    }
+    private static int boundedMaxIndex(List<Integer> batteries, int minIdx, int maxIdx){
+        int localMax = 0;
+        int index = 0;
+        for(int i = minIdx; i <= batteries.size() - maxIdx; i++){
+            if (batteries.get(i) > localMax){
+                localMax = batteries.get(i);
+                index = i;
+            }
+        }
+        return index;
+    }
 }
