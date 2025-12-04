@@ -2,6 +2,7 @@ package com.aoc.Y2025;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class day04 {
@@ -44,6 +45,25 @@ public class day04 {
 
     private static void part2(){
         long res = 0;
+        ArrayList<Roll> toRemove = new ArrayList<>();
+        do {
+            while (!toRemove.isEmpty()) {
+                Roll r = toRemove.getFirst();
+                rollArray[r.x][r.y] = '.';
+                toRemove.remove(r);
+            }
+            for (int x = 0; x < rollArray.length; x++) {
+                for (int y = 0; y < rollArray[x].length; y++) {
+                    if(rollArray[x][y] == '@'){
+                        if(checkCross(x,y) < 4){
+                            toRemove.add(new Roll(x,y));
+                        }
+                    }
+                }
+            }
+            res += toRemove.size();
+        } while (!toRemove.isEmpty());
+
         System.out.println("part 2 : " + res);
     }
 
@@ -59,8 +79,9 @@ public class day04 {
                 if (i==0 && j ==0) continue;
                 if (inBound(x+i,y+j) && rollArray[x+i][y+j] == '@') sum += 1;
             }
-
         }
         return sum;
     }
+
+    public record Roll(int x, int y){}
 }
