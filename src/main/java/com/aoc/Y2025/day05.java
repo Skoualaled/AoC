@@ -3,19 +3,17 @@ package com.aoc.Y2025;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class day05 {
 
-    private static List<Range> fresh = new ArrayList<>();
-    private static List<Long> ingredients = new ArrayList<>();
+    private static final List<Range> fresh = new ArrayList<>();
+    private static final List<Long> ingredients = new ArrayList<>();
 
     public static void main(String[] args) {
         File input = new File("src/main/resources/Y2025/day05.in");
         readFile(input);
-        part1(); // 4135
-        part2(); // 5285
+        part1();
+        part2();
     }
 
     private static void readFile(File file){
@@ -51,13 +49,13 @@ public class day05 {
 
     private static void part2(){
         long res = 0;
-
+        for(Range r : fresh){
+            res += r.end() -  r.start()+1;
+        }
         System.out.println("Part 2 : " + res);
     }
 
     private static void reduceRanges(){
-
-        System.out.println(fresh);
         int idx = 0;
         while(idx < fresh.size()-1) {
             if(fresh.get(idx).end()+1 >= fresh.get(idx+1).start()){
