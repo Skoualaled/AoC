@@ -21,6 +21,7 @@ public class day07 {
         var startTimer = Instant.now();
         File input = new File("src/main/resources/Y2025/day07.in");
         readFile(input);
+        listSplitter();
         part1();
         part2();
         var endTimer = Instant.now();
@@ -41,7 +42,6 @@ public class day07 {
 
     private static void part1(){
         long res = 0;
-        listSplitter();
         Set<Integer> beams = new HashSet<>();
         beams.add(data.getFirst().indexOf("S"));
         Set<Integer> rows = splitters.stream().map(Position::x).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
@@ -58,14 +58,30 @@ public class day07 {
                     newBeams.add(beam-1);
                 } else newBeams.add(beam);
             }
-            if (!newBeams.isEmpty()) beams = newBeams;
+           beams = newBeams;
         }
         logger.info("Part 1 : {}", res);
     }
 
     private static void part2(){
-        long res = 0;
-
+        Map<Integer, Long> beams = new HashMap<>();
+        beams.put(data.getFirst().indexOf("S"),1L);
+        Set<Integer> rows = splitters.stream().map(Position::x).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+        for(Integer row : rows){
+            Map<Integer, Long> newBeams = new HashMap<>();
+            Set<Integer> cur = splitters.stream()
+                    .filter(s -> s.x() == row)
+                    .map(Position::y)
+                    .collect(Collectors.toSet());
+            for(Integer beam : beams.keySet()){
+                if(cur.contains(beam)){
+                    newBeams.merge(beam+1, beams.get(beam), Long::sum);
+                    newBeams.merge(beam-1, beams.get(beam), Long::sum);
+                } else newBeams.merge(beam, beams.get(beam), Long::sum);
+            }
+           beams = newBeams;
+        }
+        long res = beams.values().stream().reduce(0L, Long::sum);
         logger.info("Part 2 : {}", res);
     }
 
