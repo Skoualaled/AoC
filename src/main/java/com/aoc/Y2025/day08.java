@@ -3,6 +3,7 @@ package com.aoc.Y2025;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.Duration;
@@ -15,6 +16,7 @@ public class day08 {
 
     private static final List<String> data = new ArrayList<>();
     private static final Logger logger = LogManager.getLogger(day08.class);
+    private static final Integer connectionLimit = 1000;
 
     public static void main(String[] args) {
         logger.info("Start Day 07");
@@ -50,13 +52,15 @@ public class day08 {
     }
 
     private static void part1(){
-        Map<List<Jbox>, Double> distMap = new HashMap<>();
-        List<Jbox> jboxes =  scanPart1();
-        Map<Integer, Set<Jbox>> circuits = new HashMap<>();
+
+        Map<Set<Jbox>, Double> distMap = new HashMap<>(); // Pair de Box + Distance
+        List<Jbox> jboxes =  scanPart1(); //  Input
+        Map<Integer, Set<Jbox>> circuits = new HashMap<>(); // id + list des box ds circuit
+
         for(Jbox curBox : jboxes){
-            List<Jbox> toPair = jboxes.stream().filter(b -> !b.equals(curBox)).toList();
-            for(Jbox secondBox : toPair){
-                List<Jbox> boxList = List.of(curBox, secondBox);
+            List<Jbox> others = jboxes.stream().filter(b -> !b.equals(curBox)).toList();
+            for(Jbox secondBox : others){
+                Set<Jbox> boxList = Set.of(curBox, secondBox);
                 if(!distMap.containsKey(boxList)){
                     distMap.put(boxList, distBoxes(curBox,secondBox));
                 }
@@ -70,37 +74,53 @@ public class day08 {
                         Map.Entry::getKey,
                         Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+        //logger.debug(distMap.toString());
         int limit = 0;
         int MaxId = 0;
-        for(List<Jbox> key : distMap.keySet()){
-            if (limit == 10) break;
-            int curCircuit=0;
+        for(Set<Jbox> key :distMap.keySet()){
+            if (limit == connectionLimit) break;
+            List<Integer> curCircuit = new ArrayList<>();
             for(Integer c : circuits.keySet()){
-                if (circuits.get(c).contains(key.getFirst()) || circuits.get(c).contains(key.getLast())) curCircuit = c; break;
+                for(Jbox b : key){
+                    if (circuits.get(c).contains(b)) {
+                        curCircuit.add(c);
+                    }
+                }
             }
-            if (curCircuit == 0){
+            if (curCircuit.isEmpty()){
                 MaxId++;
                 circuits.put(MaxId, new HashSet<>(key)) ;
-            }else{
-                circuits.get(curCircuit).addAll(key);
+
+            } else if (curCircuit.size()==1) {
+               circuits.get(curCircuit.getFirst()).addAll(key);
+            } else if (curCircuit.getFirst()!=curCircuit.getLast()) {
+                    int cKey = curCircuit.getFirst();
+                    Set<Jbox> newCir = circuits.get(cKey);
+                    for (int i = 1; i < curCircuit.size(); i++) {
+                        newCir.addAll(circuits.get(curCircuit.get(i)));
+                        circuits.put(cKey, newCir);
+                        circuits.remove(curCircuit.get(i));
+                    }
             }
+
             limit++;
         }
-        List<Integer> r = circuits.entrySet()
+        //logger.debug(circuits.toString());
+        Map<Integer, Integer> circuitSize = circuits.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size()));
+       // logger.debug(circuitSize.toString());
+        List<Integer> r = circuitSize.entrySet()
                 .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size()))
-                .entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue())
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new))
                 .values().stream().toList();
-
+        //logger.debug(r.toString());
         long res = r.getFirst()* r.get(1) * r.get(2);
         logger.info("Part 1 : {}", res);
     }
+
 
     private static void part2(){
         long res =0;
