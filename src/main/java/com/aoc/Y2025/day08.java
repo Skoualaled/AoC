@@ -56,7 +56,7 @@ public class day08 {
         Map<Set<Jbox>, Double> distMap = new HashMap<>(); // Pair de Box + Distance
         List<Jbox> jboxes =  scanPart1(); //  Input
         Map<Integer, Set<Jbox>> circuits = new HashMap<>(); // id + list des box ds circuit
-
+        Map<Integer, Set<Jbox>> circuitsP1 = new HashMap<>();
         for(Jbox curBox : jboxes){
             List<Jbox> others = jboxes.stream().filter(b -> !b.equals(curBox)).toList();
             for(Jbox secondBox : others){
@@ -123,9 +123,61 @@ public class day08 {
 
 
     private static void part2(){
-        long res =0;
-        logger.info("Part 2 : {}", res);
+        Map<Set<Jbox>, Double> distMap = new HashMap<>(); // Pair de Box + Distance
+        List<Jbox> jboxes =  scanPart1(); //  Input
+        Map<Integer, Set<Jbox>> circuits = new HashMap<>(); // id + list des box ds circuit
+        for(Jbox curBox : jboxes){
+            List<Jbox> others = jboxes.stream().filter(b -> !b.equals(curBox)).toList();
+            for(Jbox secondBox : others){
+                Set<Jbox> boxList = Set.of(curBox, secondBox);
+                if(!distMap.containsKey(boxList)){
+                    distMap.put(boxList, distBoxes(curBox,secondBox));
+                }
+            }
+        }
+        // map sort by values
+        distMap = distMap.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+        //logger.debug(distMap.toString());
+        int limit = 0;
+        int MaxId = 0;
+        for(Set<Jbox> key :distMap.keySet()){
+            List<Integer> curCircuit = new ArrayList<>();
+            for(Integer c : circuits.keySet()){
+                for(Jbox b : key){
+                    if (circuits.get(c).contains(b)) {
+                        curCircuit.add(c);
+                    }
+                }
+            }
+            if (curCircuit.isEmpty()){
+                MaxId++;
+                circuits.put(MaxId, new HashSet<>(key)) ;
+
+            } else if (curCircuit.size()==1) {
+                circuits.get(curCircuit.getFirst()).addAll(key);
+            } else if (curCircuit.getFirst()!=curCircuit.getLast()) {
+                int cKey = curCircuit.getFirst();
+                Set<Jbox> newCir = circuits.get(cKey);
+                for (int i = 1; i < curCircuit.size(); i++) {
+                    newCir.addAll(circuits.get(curCircuit.get(i)));
+                    circuits.put(cKey, newCir);
+                    circuits.remove(curCircuit.get(i));
+                }
+            }
+            if(circuits.entrySet().stream().findFirst().get().getValue().size() == jboxes.size()){
+                List<Jbox> res = key.stream().toList();
+                logger.info("Part 2 : {}", res.getFirst().x * res.getLast().x);
+                break;
+            }
+        }
     }
+
 
     private record Jbox(int x, int y, int z){}
     public static double distBoxes(Jbox f, Jbox s){
