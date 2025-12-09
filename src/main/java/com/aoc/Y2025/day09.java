@@ -8,13 +8,16 @@ import java.io.FileNotFoundException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class day09 {
 
     private static final List<Position> redTiles = new ArrayList<>();
     private static final Logger logger = LogManager.getLogger(day09.class);
-    private static final Map<Rect, Long> rectArea = new HashMap<>();
-    private static final List<Edge> edges = new ArrayList<>();
+    private static Map<Rect, Long> rectArea = new HashMap<>();
+    private static final List<Edge> verticalEdges = new ArrayList<>();
+    private static final List<Edge> horizontalEdges = new ArrayList<>();
 
 
     public static void main(String[] args) {
@@ -48,14 +51,15 @@ public class day09 {
             Position first = redTiles.get(i);
             for (int j = i+1; j < redTiles.size(); j++) {
                 Position second = redTiles.get(j);
-                long score = (long) Math.abs(first.x() - second.x()+1) * Math.abs(first.y() - second.y()+1);
+                long score = (long) (Math.abs(first.x() - second.x())+1) * (Math.abs(first.y() - second.y())+1);
                 res = Math.max(score, res);
-                Position c = new Position(first.x, second.y);
-                Position d = new Position(second.x, first.y);
-                Edge diagonal = new Edge(first, second);
-                Edge bord1 = new Edge(first, c);
-                Edge bord2 = new Edge(first, d);
-                rectArea.put(new Rect(diagonal, bord1, bord2), score);
+                if(first.x == second.x || first.y == second.y) continue;
+
+                rectArea.put(new Rect(Math.min(first.x, second.x),
+                                      Math.max(first.x, second.x),
+                                      Math.min(first.y, second.y),
+                                      Math.max(first.y, second.y))
+                             , score);
             }
         }
         logger.info("Part 1 : {}", res);
@@ -63,42 +67,92 @@ public class day09 {
 
     private static void part2(){
         long max = 0;
-
-        for (int i = 0; i < redTiles.size()-1; i++) {
-            edges.add(new Edge(redTiles.get(i), redTiles.get(i+1)));
+        rectArea = rectArea.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+        for (int i = 0; i < redTiles.size(); i++) {
+            Edge cur;
+            if(i == redTiles.size()-1){
+                cur = new Edge(Math.min(redTiles.getFirst().x, redTiles.getLast().x),
+                        Math.max(redTiles.getFirst().x, redTiles.getLast().x),
+                        Math.min(redTiles.getFirst().y, redTiles.getLast().y),
+                        Math.max(redTiles.getFirst().y, redTiles.getLast().y));
+            }else {
+                cur = new Edge(Math.min(redTiles.get(i).x, redTiles.get(i + 1).x),
+                        Math.max(redTiles.get(i).x, redTiles.get(i + 1).x),
+                        Math.min(redTiles.get(i).y, redTiles.get(i + 1).y),
+                        Math.max(redTiles.get(i).y, redTiles.get(i + 1).y));
+            }
+            if (cur.isVertical()) verticalEdges.add(cur);
+            else horizontalEdges.add(cur);
         }
-        edges.add(new Edge(redTiles.getLast(), redTiles.getFirst()));
-        
-        /*logger.debug(edges.toString());
-        logger.debug(rectArea.toString());*/
-        for(Rect e : rectArea.keySet()){
+        logger.debug("VERTICAL {}",verticalEdges.toString());
+        logger.debug("HORIZONTAL {}",horizontalEdges.toString());
+        logger.debug("RECT {}",rectArea.toString());
+        for(Rect rect : rectArea.keySet()){
             boolean valid = true;
-            for(Edge b : edges){
-                //if (e.diagonal.equals(b)) continue;
-                if (b.intersect(e.diagonal) || b.intersect(e.bord1) || b.intersect(e.bord2)) {
-                    valid = false;
+            for(Edge edge : horizontalEdges){
+                if (edge.minY < rect.minY || edge.maxY > rect.maxY) continue;
+                //if((edge.maxX > rect.minX && edge.minX < rect.maxX)
+                //   || (edge.maxX < rect.maxX && edge.minX > rect.maxX)
+                if((edge.minX > rect.minX && edge.maxX < rect.maxX && edge.maxX > rect.minX)
+                   || (edge.minX > rect.minX && edge.minX < rect.maxX && edge.maxX > rect.maxX)
+                )
+                {
+                    if(rectArea.get(rect) == 24) {
+                        logger.debug("H " + rect +" & "+edge);
+                        logger.debug(edge.maxX +" & "+rect.minX +" & "+ edge.minX +" & "+ rect.maxX);
+                    }
+                    valid=false;
                     break;
                 }
             }
-            if (valid) max = Math.max(max, rectArea.get(e));
+            //if(valid) continue;
+            for(Edge edge :verticalEdges){
+
+                if (edge.minX < rect.minX || edge.maxX > rect.maxX) continue;
+                if((edge.minY > rect.minY && edge.maxY < rect.maxY && edge.maxY > rect.minY)
+                        || (edge.minY > rect.minY && edge.minY < rect.maxY && edge.maxY > rect.maxY)
+                   //|| (edge.maxY < rect.maxY && edge.minY > rect.maxY)
+                  ){
+                    if(rectArea.get(rect) == 24) {
+                        logger.debug("V " + rect +" & "+edge);
+                        logger.debug(edge.maxY +" & "+rect.minY +" & "+ edge.minY +" & "+ rect.maxY);
+                    }
+                    valid=false;
+                    break;
+                }
+            }
+            if(valid){
+                logger.debug("RECT : {}", rect);
+                logger.info("Part 2 : {}", rectArea.get(rect));
+                break;
+            }
         }
-        logger.info("Part 2 : {}", max);
+        //logger.info("Part 2 : {}", max);
     }
 
     public record Position(int x, int y) {}
-    public record Rect(Edge diagonal, Edge bord1, Edge bord2){}
-    public record Edge(Position p1, Position p2) {
-        public Edge swap() {
-            return new Edge(p2, p1);
-        }
-        public boolean intersect(Edge line) {
-            Position p3 = line.p1;
-            Position p4 = line.p2;
-            if (p1.equals(p3) || p1 .equals(p4) || p2.equals(p3) || p2.equals(p4)) return false;
-            double denominator = ((p1.x - p2.x)*(p3.y - p4.y) - (p1.y - p2.y)*(p3.x - p4.x));
-            double t = ((p1.x - p3.x)*(p3.y - p4.y) - (p1.y - p3.y)*(p3.x - p4.x)) / denominator;
-            double u = -1*(((p1.x - p2.x)*(p1.y - p3.y) - (p1.y - p2.y)*(p1.x - p3.x)) / denominator);
-            return t>=0 && t <=1 && u >=0 && u <=1 ;
+
+    /***
+     * X →
+     * Y A--------B
+     * ↓ |        |
+     *   |        |
+     *   D--------C
+     *   A -> MinX, MinY
+     *   B -> MaxX, MinY
+     *   C -> MaxX, MaxY
+     *   D -> MinX, MaxY
+     */
+    public record Rect(Integer minX, Integer maxX, Integer minY, Integer maxY){}
+    public record Edge(Integer minX, Integer maxX, Integer minY, Integer maxY){
+        public boolean isVertical(){
+            return minX == maxX;
         }
     }
 
