@@ -9,15 +9,14 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class day09 {
 
     private static final List<Position> redTiles = new ArrayList<>();
     private static final Logger logger = LogManager.getLogger(day09.class);
     private static Map<Rect, Long> rectArea = new HashMap<>();
-    private static final List<Edge> verticalEdges = new ArrayList<>();
-    private static final List<Edge> horizontalEdges = new ArrayList<>();
+    private static final List<Rect> verticalEdges = new ArrayList<>();
+    private static final List<Rect> horizontalEdges = new ArrayList<>();
 
 
     public static void main(String[] args) {
@@ -66,7 +65,6 @@ public class day09 {
     }
 
     private static void part2(){
-        long max = 0;
         rectArea = rectArea.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
@@ -74,15 +72,16 @@ public class day09 {
                         Map.Entry::getKey,
                         Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+        // List des bord vertical et horizontal
         for (int i = 0; i < redTiles.size(); i++) {
-            Edge cur;
+            Rect cur;
             if(i == redTiles.size()-1){
-                cur = new Edge(Math.min(redTiles.getFirst().x, redTiles.getLast().x),
+                cur = new Rect(Math.min(redTiles.getFirst().x, redTiles.getLast().x),
                         Math.max(redTiles.getFirst().x, redTiles.getLast().x),
                         Math.min(redTiles.getFirst().y, redTiles.getLast().y),
                         Math.max(redTiles.getFirst().y, redTiles.getLast().y));
             }else {
-                cur = new Edge(Math.min(redTiles.get(i).x, redTiles.get(i + 1).x),
+                cur = new Rect(Math.min(redTiles.get(i).x, redTiles.get(i + 1).x),
                         Math.max(redTiles.get(i).x, redTiles.get(i + 1).x),
                         Math.min(redTiles.get(i).y, redTiles.get(i + 1).y),
                         Math.max(redTiles.get(i).y, redTiles.get(i + 1).y));
@@ -93,14 +92,12 @@ public class day09 {
         logger.debug("VERTICAL {}",verticalEdges.toString());
         logger.debug("HORIZONTAL {}",horizontalEdges.toString());
         logger.debug("RECT {}",rectArea.toString());
+
         for(Rect rect : rectArea.keySet()){
             boolean valid = true;
-            for(Edge edge : horizontalEdges){
+            for(Rect edge : horizontalEdges){
                 if (edge.minY < rect.minY || edge.maxY > rect.maxY) continue;
-                //if((edge.maxX > rect.minX && edge.minX < rect.maxX)
-                //   || (edge.maxX < rect.maxX && edge.minX > rect.maxX)
-                if((edge.minX > rect.minX && edge.maxX < rect.maxX && edge.maxX > rect.minX)
-                   || (edge.minX > rect.minX && edge.minX < rect.maxX && edge.maxX > rect.maxX)
+                if(edge.minX > rect.minX && edge.minX < rect.maxX
                 )
                 {
                     if(rectArea.get(rect) == 24) {
@@ -112,11 +109,10 @@ public class day09 {
                 }
             }
             //if(valid) continue;
-            for(Edge edge :verticalEdges){
+            for(Rect edge :verticalEdges){
 
                 if (edge.minX < rect.minX || edge.maxX > rect.maxX) continue;
-                if((edge.minY > rect.minY && edge.maxY < rect.maxY && edge.maxY > rect.minY)
-                        || (edge.minY > rect.minY && edge.minY < rect.maxY && edge.maxY > rect.maxY)
+                if(edge.minY > rect.minY && edge.minY < rect.maxY
                    //|| (edge.maxY < rect.maxY && edge.minY > rect.maxY)
                   ){
                     if(rectArea.get(rect) == 24) {
@@ -149,8 +145,7 @@ public class day09 {
      *   C -> MaxX, MaxY
      *   D -> MinX, MaxY
      */
-    public record Rect(Integer minX, Integer maxX, Integer minY, Integer maxY){}
-    public record Edge(Integer minX, Integer maxX, Integer minY, Integer maxY){
+    public record Rect(int minX, int maxX, int minY, int maxY){
         public boolean isVertical(){
             return minX == maxX;
         }
