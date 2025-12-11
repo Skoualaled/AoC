@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class day11 {
 
@@ -67,7 +68,9 @@ public class day11 {
 
     private static void part2(){
         long max = 0;
-        logger.info("Part 2 : {}", max);
+        Set<LinkedList<String>> answer = solve("svr");
+        answer = answer.stream().filter(l -> l.contains("fft") && l.contains("dac")).collect(Collectors.toSet());
+        logger.info("Part 2 : {}", answer.size());
     }
 
 }
