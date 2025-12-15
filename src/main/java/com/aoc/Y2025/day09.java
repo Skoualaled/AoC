@@ -14,9 +14,8 @@ public class day09 {
 
     private static final List<Position> redTiles = new ArrayList<>();
     private static final Logger logger = LogManager.getLogger(day09.class);
-    private static Map<Rect, Long> rectArea = new HashMap<>();
-    private static final List<Rect> verticalEdges = new ArrayList<>();
-    private static final List<Rect> horizontalEdges = new ArrayList<>();
+    private static final Map<Rect, Long> rectArea = new HashMap<>();
+    private static final List<Rect> edges = new ArrayList<>();
 
 
     public static void main(String[] args) {
@@ -65,7 +64,8 @@ public class day09 {
     }
 
     private static void part2(){
-        rectArea = rectArea.entrySet()
+        long res = -1;
+        LinkedHashMap<Rect, Long> orderedRect = rectArea.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .collect(Collectors.toMap(
@@ -74,62 +74,41 @@ public class day09 {
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
         // List des bord vertical et horizontal
         for (int i = 0; i < redTiles.size(); i++) {
-            Rect cur;
-            if(i == redTiles.size()-1){
-                cur = new Rect(Math.min(redTiles.getFirst().x, redTiles.getLast().x),
-                        Math.max(redTiles.getFirst().x, redTiles.getLast().x),
-                        Math.min(redTiles.getFirst().y, redTiles.getLast().y),
-                        Math.max(redTiles.getFirst().y, redTiles.getLast().y));
-            }else {
-                cur = new Rect(Math.min(redTiles.get(i).x, redTiles.get(i + 1).x),
-                        Math.max(redTiles.get(i).x, redTiles.get(i + 1).x),
-                        Math.min(redTiles.get(i).y, redTiles.get(i + 1).y),
-                        Math.max(redTiles.get(i).y, redTiles.get(i + 1).y));
-            }
-            if (cur.isVertical()) verticalEdges.add(cur);
-            else horizontalEdges.add(cur);
+            Rect cur = getRect(i);
+            edges.add(cur);
         }
-        logger.debug("VERTICAL {}",verticalEdges.toString());
-        logger.debug("HORIZONTAL {}",horizontalEdges.toString());
-        logger.debug("RECT {}",rectArea.toString());
 
-        for(Rect rect : rectArea.keySet()){
+        for(Rect rect : orderedRect.sequencedKeySet()){
             boolean valid = true;
-            for(Rect edge : horizontalEdges){
-                if (edge.minY < rect.minY || edge.maxY > rect.maxY) continue;
-                if(edge.minX > rect.minX && edge.minX < rect.maxX
-                )
-                {
-                    if(rectArea.get(rect) == 24) {
-                        logger.debug("H " + rect +" & "+edge);
-                        logger.debug(edge.maxX +" & "+rect.minX +" & "+ edge.minX +" & "+ rect.maxX);
-                    }
-                    valid=false;
-                    break;
-                }
-            }
-            //if(valid) continue;
-            for(Rect edge :verticalEdges){
-
-                if (edge.minX < rect.minX || edge.maxX > rect.maxX) continue;
-                if(edge.minY > rect.minY && edge.minY < rect.maxY
-                   //|| (edge.maxY < rect.maxY && edge.minY > rect.maxY)
-                  ){
-                    if(rectArea.get(rect) == 24) {
-                        logger.debug("V " + rect +" & "+edge);
-                        logger.debug(edge.maxY +" & "+rect.minY +" & "+ edge.minY +" & "+ rect.maxY);
-                    }
-                    valid=false;
+             for(Rect edge : edges){
+                if (edge.minX < rect.maxX && edge.minY < rect.maxY && edge.maxX > rect.minX && edge.maxY > rect.minY) {
+                    valid = false;
                     break;
                 }
             }
             if(valid){
                 logger.debug("RECT : {}", rect);
-                logger.info("Part 2 : {}", rectArea.get(rect));
+                res = rectArea.get(rect);
                 break;
             }
         }
-        //logger.info("Part 2 : {}", max);
+        logger.info("Part 2 : {} ", res);
+    }
+
+    private static Rect getRect(int i) {
+        Rect cur;
+        if (i == redTiles.size() - 1) {
+            cur = new Rect(Math.min(redTiles.getFirst().x, redTiles.getLast().x),
+                    Math.max(redTiles.getFirst().x, redTiles.getLast().x),
+                    Math.min(redTiles.getFirst().y, redTiles.getLast().y),
+                    Math.max(redTiles.getFirst().y, redTiles.getLast().y));
+        } else {
+            cur = new Rect(Math.min(redTiles.get(i).x, redTiles.get(i + 1).x),
+                    Math.max(redTiles.get(i).x, redTiles.get(i + 1).x),
+                    Math.min(redTiles.get(i).y, redTiles.get(i + 1).y),
+                    Math.max(redTiles.get(i).y, redTiles.get(i + 1).y));
+        }
+        return cur;
     }
 
     public record Position(int x, int y) {}
@@ -146,8 +125,9 @@ public class day09 {
      *   D -> MinX, MaxY
      */
     public record Rect(int minX, int maxX, int minY, int maxY){
-        public boolean isVertical(){
-            return minX == maxX;
+        @Override
+        public String toString(){
+            return "Rect=[(%s, %s), (%s,%s)]".formatted(minX, minY, maxX, maxY);
         }
     }
 
